@@ -1,6 +1,6 @@
 import itertools
-from typing import Tuple
 import operator
+
 
 def bsp_to_int(spec: str, maximum: int, notation: str) -> int:
     minimum = 0
