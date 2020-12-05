@@ -3,9 +3,9 @@ import functools
 import operator
 
 
-def is_collision(position, terrain) -> bool:
-    position = position % len(terrain)
-    collision = terrain[position % len(terrain)] == '#'
+def is_collision(position: int, terrain_row: str) -> bool:
+    position = position % len(terrain_row)
+    collision = terrain_row[position % len(terrain_row)] == '#'
     return collision
 
 
@@ -19,8 +19,8 @@ def count_collisions(terrain: List[str], rule_across: int, rule_down: int) -> in
 with open('input.txt', 'r') as f:
     terrain_set = list(line.strip() for line in f.readlines())
 
-print(count_collisions(terrain_set, 3, 1))
+print("Collisions for (3,1) slope: {}".format(count_collisions(terrain_set, 3, 1)))
 
 slopes = [(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)]
 collision_counts = [count_collisions(terrain_set, right, down) for right, down in slopes]
-print(functools.reduce(operator.mul, collision_counts, 1))
+print("Product of collision counts for all slopes: {}".format(functools.reduce(operator.mul, collision_counts, 1)))
