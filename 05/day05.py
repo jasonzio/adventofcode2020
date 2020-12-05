@@ -2,8 +2,10 @@ import itertools
 import operator
 
 
-def bsp_to_int(spec: str, maximum: int, notation: str) -> int:
+def bsp_to_int(spec: str, notation: str) -> int:
+    """Convert binary space partition specification to the index within the space"""
     minimum = 0
+    maximum = pow(2, len(spec))
     for c in spec:
         stride = int((maximum - minimum) / 2)
         if c == notation[0]:    # lower half
@@ -14,8 +16,8 @@ def bsp_to_int(spec: str, maximum: int, notation: str) -> int:
 
 
 def boarding_pass_id(boarding_pass: str) -> int:
-    row = bsp_to_int(boarding_pass[:-3], 128, 'FB')
-    seat = bsp_to_int(boarding_pass[-3:], 8, 'LR')
+    row = bsp_to_int(boarding_pass[:-3], 'FB')
+    seat = bsp_to_int(boarding_pass[-3:], 'LR')
     seat_id = row*8 + seat
     return seat_id
 
