@@ -46,7 +46,7 @@ with open('input.txt', 'r') as f:
 
 contains = {outer: inner for outer, inner in parsed_rules}
 contained_by = defaultdict(list)
-[[contained_by[ic].append(outer) for ic in inner.keys()] for outer, inner in contains.items()]
+[contained_by[ic].append(outer) for outer, inner in contains.items() for ic in inner.keys()]
 
 sgb = "shiny gold bag"
 print('Bag colors holding a {}: {}'.format(sgb, len(close_contents(sgb, contained_by))))
