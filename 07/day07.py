@@ -1,4 +1,5 @@
 from collections import defaultdict
+from functools import lru_cache
 from typing import Tuple, List, Dict, Set
 import re
 
@@ -37,8 +38,9 @@ def close_contents(color: str, contained_by: Dict[str, List[str]]) -> Set[str]:
     return results
 
 
-def count_contained_bags(color: str, contains: Dict[str, Dict[str, int]]) -> int:
-    return sum(multiple * (1 + count_contained_bags(inner, contains)) for inner, multiple in contains[color].items())
+@lru_cache(maxsize=None)
+def count_contained_bags(color: str) -> int:
+    return sum(multiple * (1 + count_contained_bags(inner)) for inner, multiple in contains[color].items())
 
 
 with open('input.txt', 'r') as f:
@@ -50,4 +52,4 @@ contained_by = defaultdict(list)
 
 sgb = "shiny gold bag"
 print('Bag colors holding a {}: {}'.format(sgb, len(close_contents(sgb, contained_by))))
-print('Bags inside the {}: {}'.format(sgb, count_contained_bags(sgb, contains)))
+print('Bags inside the {}: {}'.format(sgb, count_contained_bags(sgb)))
