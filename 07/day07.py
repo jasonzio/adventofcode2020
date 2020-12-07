@@ -1,5 +1,6 @@
+import operator
 from collections import defaultdict
-from functools import lru_cache
+from functools import lru_cache, reduce
 from typing import Tuple, List, Dict, Set
 import re
 
@@ -26,16 +27,10 @@ def parse_rule(rule: str) -> Tuple[str, Dict[str, int]]:
     return outer, inner
 
 
-def close_contents(color: str, contained_by: Dict[str, List[str]]) -> Set[str]:
-    search_list = contained_by[color]
-    already_searched = set()
-    results = set()
-    while search_list:
-        target = search_list.pop()
-        if target not in already_searched:
-            results.add(target)
-            search_list.extend(contained_by[target])
-    return results
+@lru_cache(maxsize=None)
+def is_x_in_y(target: str, outer: str) -> bool:
+    return target in contains[outer] \
+           or reduce(operator.or_, [is_x_in_y(target, bag) for bag in contains[outer].keys()], False)
 
 
 @lru_cache(maxsize=None)
@@ -51,5 +46,6 @@ contained_by = defaultdict(list)
 [contained_by[ic].append(outer) for outer, inner in contains.items() for ic in inner.keys()]
 
 sgb = "shiny gold bag"
-print('Bag colors holding a {}: {}'.format(sgb, len(close_contents(sgb, contained_by))))
+count = sum([1 if is_x_in_y(sgb, bag) else 0 for bag in contains.keys()])
+print('Bag colors holding a {}: {}'.format(sgb, count))
 print('Bags inside the {}: {}'.format(sgb, count_contained_bags(sgb)))
