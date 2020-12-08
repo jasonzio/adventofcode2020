@@ -2,6 +2,10 @@ from typing import List, Set, Dict
 
 
 def chunk_lines(lines: List[str]):
+    """
+    Given a stream of lines of interesting data separated by a blank line, generate one block of
+    interesting data at a time.
+    """
     chunk = []
     for line in lines:
         line = line.strip()
