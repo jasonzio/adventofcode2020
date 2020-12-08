@@ -22,6 +22,12 @@ class Instruction:
         return self._opcode
 
     def dupe_alter_opcode(self, new_op: str):
+        """
+        Create a new Instruction which differs from self only in the opcode.
+
+        :param new_op: The new opcode
+        :rtype: Instruction
+        """
         return Instruction("{} {}{}".format(new_op, self._sign, self._val))
 
 
