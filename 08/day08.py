@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import List
 import re
 
 
@@ -31,7 +31,6 @@ class Instruction:
         return Instruction("{} {}{}".format(new_op, self._sign, self._val))
 
 
-
 class Cpu:
     memory: List[Instruction]
 
@@ -47,10 +46,6 @@ class Cpu:
     def load_program(self, program: List[Instruction]):
         self.memory = program
 
-    def _opfetch(self, opcode: str):
-        fn = Cpu.__dict__[opcode]
-        return fn
-
     def run_program(self, start: int) -> str:
         self.acc = 0
         self.dirty = set()
@@ -63,23 +58,17 @@ class Cpu:
                 return "exit"
             opcode, sign, val = self.memory[self.ip].decode()
             self.dirty.add(self.ip)
-            (self._opfetch(opcode))(self, sign, val)
+            (Cpu.__dict__[opcode])(self, sign, val)
 
-    def nop(self, sign: str, val: int):
+    def nop(self, *_):
         self.ip += 1
 
     def acc(self, sign: str, val: int):
-        if sign == "+":
-            self.acc += val
-        else:
-            self.acc -= val
+        self.acc += -val if sign == "-" else val
         self.ip += 1
 
     def jmp(self, sign: str, val: int):
-        if sign == "+":
-            self.ip += val
-        else:
-            self.ip -= val
+        self.ip += -val if sign == "-" else val
 
 
 def try_mod(program: List[Instruction], ip: int, new_op: str):
@@ -101,10 +90,10 @@ core.load_program(test_program)
 core.run_program(0)
 print("Part 1: Accumulator is {}".format(core.get_acc()))
 
-for ip, instruction in enumerate(test_program):
+for address, instruction in enumerate(test_program):
     if instruction.opcode == 'nop':
-        try_mod(test_program, ip, 'jmp')
+        try_mod(test_program, address, 'jmp')
     elif instruction.opcode == 'jmp':
-        try_mod(test_program, ip, 'nop')
+        try_mod(test_program, address, 'nop')
 
 print("Part 2: No successful modification found")
