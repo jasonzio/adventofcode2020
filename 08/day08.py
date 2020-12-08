@@ -1,17 +1,10 @@
 from typing import List, Tuple, Set
-import re
 
 
 class Instruction:
-    instruction_re = re.compile(r'^([a-z]{3}) ([+-]?\d+)$')
-
     def __init__(self, text: str):
-        match = self.instruction_re.match(text.strip())
-        if match:
-            self._opcode = match.group(1)
-            self._val = int(match.group(2))
-        else:
-            raise Exception('Invalid program statement [{}]'.format(text))
+        self._opcode, value = text.split()
+        self._val = int(value)
 
     def decode(self) -> Tuple[str, int]:
         return self._opcode, self._val
@@ -27,14 +20,11 @@ class Instruction:
 class Cpu:
     memory: List[Instruction]
 
-    def __init__(self):
+    def __init__(self, program: List[Instruction]):
         self.acc = 0
-        self.memory = []
+        self.memory = program
         self.dirty = set()
         self.ip = 0
-
-    def load_program(self, program: List[Instruction]):
-        self.memory = program
 
     def run_program(self, start: int, break_at: int = -1) -> str:
         while True:
@@ -62,8 +52,7 @@ class Cpu:
 def try_mod(program: List[Instruction], tainted: Set[int], ip: int, new_op: str):
     saved_instruction = program[ip]
     program[ip] = saved_instruction.dupe_alter_opcode(new_op)
-    test_core = Cpu()
-    test_core.load_program(program)
+    test_core = Cpu(program)
     test_core.run_program(0, break_at=ip)
     test_core.dirty = set(tainted)
     test_core.dirty.discard(ip)
@@ -76,8 +65,7 @@ def try_mod(program: List[Instruction], tainted: Set[int], ip: int, new_op: str)
 with open('input.txt', 'r') as f:
     test_program = [Instruction(line) for line in f.readlines()]
 
-core = Cpu()
-core.load_program(test_program)
+core = Cpu(test_program)
 core.run_program(0)
 print("Part 1: Accumulator is {}".format(core.acc))
 
