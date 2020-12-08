@@ -1,8 +1,9 @@
 import operator
 from collections import defaultdict
 from functools import lru_cache, reduce
-from typing import Tuple, List, Dict, Set
+from typing import Tuple, Dict
 import re
+import datetime as dt
 
 
 bag_spec_re = re.compile(r'(^\d+) (.*)$')
@@ -38,14 +39,27 @@ def count_contained_bags(color: str) -> int:
     return sum(multiple * (1 + count_contained_bags(inner)) for inner, multiple in contains[color].items())
 
 
+time_start = dt.datetime.now()
 with open('input.txt', 'r') as f:
     parsed_rules = [parse_rule(line.strip()) for line in f.readlines()]
-
+time_end_io = dt.datetime.now()
 contains = {outer: inner for outer, inner in parsed_rules}
 contained_by = defaultdict(list)
 [contained_by[ic].append(outer) for outer, inner in contains.items() for ic in inner.keys()]
-
+time_end_build = dt.datetime.now()
 sgb = "shiny gold bag"
 count = sum([1 if is_x_in_y(sgb, bag) else 0 for bag in contains.keys()])
 print('Bag colors holding a {}: {}'.format(sgb, count))
+time_end_part1 = dt.datetime.now()
 print('Bags inside the {}: {}'.format(sgb, count_contained_bags(sgb)))
+time_end_part2 = dt.datetime.now()
+
+print("""
+IO time: {}
+Data structure built: {}
+Part 1 only: {}
+Part 2 only: {}
+All but I/O: {}
+Total time: {}
+""".format(time_end_io - time_start, time_end_build - time_end_io, time_end_part1 - time_end_io,
+           time_end_part2 - time_end_part1, time_end_part2 - time_end_io, time_end_part2 - time_start))
