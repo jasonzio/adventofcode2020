@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Set
 import re
 
 
@@ -33,19 +33,14 @@ class Cpu:
         self.dirty = set()
         self.ip = 0
 
-    def get_acc(self) -> int:
-        return self.acc
-
     def load_program(self, program: List[Instruction]):
         self.memory = program
 
-    def run_program(self, start: int) -> str:
-        self.acc = 0
-        self.dirty = set()
-        self.ip = start
-
+    def run_program(self, start: int, break_at: int = -1) -> str:
         while True:
-            if self.ip in self.dirty:
+            if self.ip == break_at:
+                return "break"
+            elif self.ip in self.dirty:
                 return "loop"
             elif self.ip == len(self.memory):
                 return "exit"
@@ -64,13 +59,16 @@ class Cpu:
         self.ip += val
 
 
-def try_mod(program: List[Instruction], ip: int, new_op: str):
+def try_mod(program: List[Instruction], tainted: Set[int], ip: int, new_op: str):
     saved_instruction = program[ip]
     program[ip] = saved_instruction.dupe_alter_opcode(new_op)
     test_core = Cpu()
     test_core.load_program(program)
-    if test_core.run_program(0) == 'exit':
-        print('Part 2: Accumulator is {}'.format(test_core.get_acc()))
+    test_core.run_program(0, break_at=ip)
+    test_core.dirty = set(tainted)
+    test_core.dirty.discard(ip)
+    if test_core.run_program(ip) == 'exit':
+        print('Part 2: Fixed instruction at {}. Accumulator is {}'.format(ip, test_core.acc))
         exit(0)
     program[ip] = saved_instruction
 
@@ -81,12 +79,12 @@ with open('input.txt', 'r') as f:
 core = Cpu()
 core.load_program(test_program)
 core.run_program(0)
-print("Part 1: Accumulator is {}".format(core.get_acc()))
+print("Part 1: Accumulator is {}".format(core.acc))
 
 for address, instruction in enumerate(test_program):
     if instruction.opcode == 'nop':
-        try_mod(test_program, address, 'jmp')
+        try_mod(test_program, core.dirty, address, 'jmp')
     elif instruction.opcode == 'jmp':
-        try_mod(test_program, address, 'nop')
+        try_mod(test_program, core.dirty, address, 'nop')
 
 print("Part 2: No successful modification found")
